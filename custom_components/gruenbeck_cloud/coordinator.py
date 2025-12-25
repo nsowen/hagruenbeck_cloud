@@ -253,12 +253,14 @@ class GruenbeckCloudCoordinator(DataUpdateCoordinator[Device]):
 
             if self.use_websocket:
                 # WebSocket series: ensure WS listener is running; do not stop SD polling here.
+                self.logger.debug('Using WebSocket for device %s', self.name)
                 if not self.api.connected and not self.unsub:
                     self._listen_websocket()
                 await self.api.get_device_infos()
                 return await self.api.get_device_infos_parameters()
             else:
                 # Polling-only series: keep polling enabled, just update each cycle.
+                self.logger.debug('Using Polling for device %s', self.name)
                 await self._stop_websocket()
                 await self._ensure_sd_polling()
                 # For polling-only devices, refresh device info less frequently than polling interval.
