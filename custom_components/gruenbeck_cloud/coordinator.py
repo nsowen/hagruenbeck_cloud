@@ -61,6 +61,7 @@ class GruenbeckCloudCoordinator(DataUpdateCoordinator[Device]):
 
         self.unsub: CALLBACK_TYPE | None = None
         self._sd_polling_enabled = False
+        self.last_update_time = 0.0
 
         super().__init__(hass, _LOGGER, name=DOMAIN, update_interval=UPDATE_INTERVAL)
 
@@ -244,7 +245,6 @@ class GruenbeckCloudCoordinator(DataUpdateCoordinator[Device]):
         )
 
         self.use_websocket = self._use_websocket(self.api.device)
-        self.last_update_time = time.time()
         seconds_since_last_update = time.time() - self.last_update_time
 
         try:
@@ -271,6 +271,10 @@ class GruenbeckCloudCoordinator(DataUpdateCoordinator[Device]):
                     )
                     await self.api.get_device_infos()
                     await self.api.get_device_infos_parameters()
+                    self.last_update_time = time.time()
+                else:
+                    self.logger.debug("NOT updating device infos for %s; last update: %d seconds ago, required interval: %d",
+                                      self.name, seconds_since_last_update, UPDATE_INTERVAL.total_seconds())
                 self.logger.debug(
                     "Polling data for %s",
                     self.name,
