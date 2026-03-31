@@ -20,7 +20,7 @@ Custom Component to integrate Grünbeck Cloud based Water softeners into [Home A
 |------------|------------------|-----------------|
 | softliQ.SL | WebSocket (push) | Real-time       |
 | softliQ.SD | WebSocket (push) | Real-time       |
-| softliQ.SE | HTTP polling     | 60 seconds      |
+| softliQ.SE | HTTP polling     | 10 seconds      |
 
 > [!NOTE]
 > The softliQ.SE uses a stateless per-poll HTTP cycle instead of a persistent WebSocket connection. Entities that are only available for specific series are marked in the tables below.
@@ -227,7 +227,7 @@ template:
 > [!NOTE]
 > For **SL/SD** series: `sensor.<device_name>_soft_water_quantity` is not pushed via WebSocket on every change — to avoid overloading the Grünbeck Cloud API it is refreshed every 360 seconds.
 >
-> For **SE** series: all data is polled every 60 seconds using a stateless HTTP cycle.
+> For **SE** series: all data is polled every 10 seconds using a stateless HTTP cycle.
 
 If you get an error about missing statistics, it's because the entity needs to collect some data first — it will resolve itself after a while.
 
