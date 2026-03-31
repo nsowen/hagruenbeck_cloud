@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import logging
-import time
 from typing import Any
 
 from pygruenbeck_cloud import PyGruenbeckCloud
@@ -33,13 +32,20 @@ from .const import (
     DOMAIN,
     SERVICE_PARAM_PARAMETER,
     SERVICE_PARAM_VALUE,
-    UPDATE_INTERVAL_POLLING,
     UPDATE_INTERVAL,
+    UPDATE_INTERVAL_POLLING,
 )
 
 _LOGGER = logging.getLogger(__name__)
 
 _SERIES_POLL_ONLY = "softliQ.SE"
+
+# How many SE polling cycles between full device-info refreshes.
+# UPDATE_INTERVAL / UPDATE_INTERVAL_POLLING = 360 / 60 = 6.
+_POLL_CYCLES_PER_FULL_REFRESH = max(
+    1, int(UPDATE_INTERVAL.total_seconds() / UPDATE_INTERVAL_POLLING.total_seconds())
+)
+
 
 class GruenbeckCloudCoordinator(DataUpdateCoordinator[Device]):
     """Grünbeck Cloud Coordinator."""
@@ -60,14 +66,12 @@ class GruenbeckCloudCoordinator(DataUpdateCoordinator[Device]):
         self._device_id = config_entry.data[CONF_DEVICE_ID]
 
         self.unsub: CALLBACK_TYPE | None = None
-        self._sd_polling_enabled = False
-        self.last_update_time = 0.0
+        self._poll_cycle: int = 0
 
         super().__init__(hass, _LOGGER, name=DOMAIN, update_interval=UPDATE_INTERVAL)
 
     async def disconnect(self) -> None:
         """Disconnect from API."""
-        await self._stop_sd_polling()
         await self._stop_websocket()
 
     @staticmethod
@@ -77,40 +81,6 @@ class GruenbeckCloudCoordinator(DataUpdateCoordinator[Device]):
             return False
         series = getattr(device, "series", None)
         return series is not None and series != _SERIES_POLL_ONLY
-
-    async def _ensure_sd_polling(self) -> None:
-        """Enable SD polling mode for devices that do not use WebSockets."""
-        if self._sd_polling_enabled:
-            return
-        self.logger.debug(
-            "Setting polling mode for %s",
-            self.name,
-        )
-
-        # Do initial device info refresh before entering SD mode
-        await self.api.get_device_infos()
-        await self.api.get_device_infos_parameters()
-
-        # update interval for shorter polling
-        self.update_interval = UPDATE_INTERVAL_POLLING
-        await self.api.refresh_sd()
-        await self.api.enter_sd()
-
-        self._sd_polling_enabled = True
-
-    async def _stop_sd_polling(self) -> None:
-        """Disable SD polling mode when polling flow must stop."""
-        if not self._sd_polling_enabled:
-            return
-        self.logger.debug(
-            "Stopping polling mode for %s",
-            self.name,
-        )
-        try:
-            await self.api.leave_sd()
-        finally:
-            await self.api.off_sd()
-            self._sd_polling_enabled = False
 
     async def _stop_websocket(self) -> None:
         """Stop WebSocket listener and disconnect if needed."""
@@ -244,53 +214,47 @@ class GruenbeckCloudCoordinator(DataUpdateCoordinator[Device]):
             self.name,
         )
 
-        self.use_websocket = self._use_websocket(self.api.device)
-        seconds_since_last_update = time.time() - self.last_update_time
-
         try:
             if not self.api.device:
                 await self.api.set_device_from_id(self._device_id)
 
-            if self.use_websocket:
-                # WebSocket series: ensure WS listener is running; do not stop SD polling here.
-                self.logger.debug('Using WebSocket for device %s', self.name)
+            if self._use_websocket(self.api.device):
+                # WebSocket-capable series (SL, SD, …): use WS for realtime data.
+                self.logger.debug("Using WebSocket for device %s", self.name)
                 if not self.api.connected and not self.unsub:
                     self._listen_websocket()
                 await self.api.get_device_infos()
                 return await self.api.get_device_infos_parameters()
+
             else:
-                # Polling-only series: keep polling enabled, just update each cycle.
-                self.logger.debug('Using Polling for device %s', self.name)
+                # SE-series: per-poll stateless cycle (refresh→enter→update→leave→off).
+                # Do NOT hold a persistent realtime session — the server drops it after
+                # ~10-15 minutes, causing updates to silently stall.
+                self.logger.debug("Using polling for device %s", self.name)
                 await self._stop_websocket()
-                await self._ensure_sd_polling()
-                # For polling-only devices, refresh device info less frequently than polling interval.
-                if seconds_since_last_update > UPDATE_INTERVAL.total_seconds():
+
+                # Switch coordinator to shorter polling interval on first SE poll.
+                if self.update_interval != UPDATE_INTERVAL_POLLING:
+                    self.update_interval = UPDATE_INTERVAL_POLLING
+
+                # Refresh static device info every _POLL_CYCLES_PER_FULL_REFRESH cycles.
+                if self._poll_cycle % _POLL_CYCLES_PER_FULL_REFRESH == 0:
                     self.logger.debug(
-                        "Updating device infos and parameters for %s",
+                        "Full device info refresh for %s (cycle %d)",
                         self.name,
+                        self._poll_cycle,
                     )
                     await self.api.get_device_infos()
                     await self.api.get_device_infos_parameters()
-                    self.last_update_time = time.time()
-                else:
-                    self.logger.debug("NOT updating device infos for %s; last update: %d seconds ago, required interval: %d",
-                                      self.name, seconds_since_last_update, UPDATE_INTERVAL.total_seconds())
-                self.logger.debug(
-                    "Polling data for %s",
-                    self.name,
-                )
-                return await self.api.update_sd()
+
+                self._poll_cycle += 1
+
+                return await self.api.poll_sd()
 
         except (
-                Exception,
-                IndexError,
-                KeyError,
-                PyGruenbeckCloudResponseStatusError,
+            Exception,
+            IndexError,
+            KeyError,
+            PyGruenbeckCloudResponseStatusError,
         ) as err:
-            await self._stop_sd_polling()
-            self.logger.error(
-                "API failure for %s",
-                self.name,
-                err
-            )
             raise UpdateFailed(f"Unable to get data from API: {err}") from err
