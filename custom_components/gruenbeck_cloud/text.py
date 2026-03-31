@@ -43,6 +43,7 @@ TEXTS: tuple[GruenbeckCloudEntityDescription, ...] = (
         translation_key="installer_name",
         entity_category=EntityCategory.CONFIG,
         entity_registry_enabled_default=False,
+        exists_fn=lambda device: device.series != "softliQ.SE",
         value_fn=lambda device: device.parameters.installer_name,
         # We get currently a 500 error from API if we try to change it
         update_fn=lambda device, value: {"installer_name": value},
@@ -52,6 +53,7 @@ TEXTS: tuple[GruenbeckCloudEntityDescription, ...] = (
         translation_key="installer_phone",
         entity_category=EntityCategory.CONFIG,
         entity_registry_enabled_default=False,
+        exists_fn=lambda device: device.series != "softliQ.SE",
         value_fn=lambda device: device.parameters.installer_phone,
         # We get currently a 500 error from API if we try to change it
         update_fn=lambda device, value: {"installer_phone": value},
@@ -61,6 +63,7 @@ TEXTS: tuple[GruenbeckCloudEntityDescription, ...] = (
         translation_key="installer_email",
         entity_category=EntityCategory.CONFIG,
         entity_registry_enabled_default=False,
+        exists_fn=lambda device: device.series != "softliQ.SE",
         value_fn=lambda device: device.parameters.installer_email,
         # We get currently a 500 error from API if we try to change it
         update_fn=lambda device, value: {"installer_email": value},

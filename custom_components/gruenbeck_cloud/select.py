@@ -112,6 +112,7 @@ SELECTS: tuple[GruenbeckCloudEntityDescription, ...] = (
         key="mode_individual_monday",
         translation_key="mode_individual_monday",
         entity_registry_enabled_default=False,
+        exists_fn=lambda device: device.series != "softliQ.SE",
         options=list(PARAMETER_OPERATION_MODES.values()),
         value_fn=lambda device: PARAMETER_OPERATION_MODES[
             device.parameters.mode_individual_monday  # type: ignore[index]
@@ -126,6 +127,7 @@ SELECTS: tuple[GruenbeckCloudEntityDescription, ...] = (
         key="mode_individual_tuesday",
         translation_key="mode_individual_tuesday",
         entity_registry_enabled_default=False,
+        exists_fn=lambda device: device.series != "softliQ.SE",
         options=list(PARAMETER_OPERATION_MODES.values()),
         value_fn=lambda device: PARAMETER_OPERATION_MODES[
             device.parameters.mode_individual_tuesday  # type: ignore[index]
@@ -140,6 +142,7 @@ SELECTS: tuple[GruenbeckCloudEntityDescription, ...] = (
         key="mode_individual_wednesday",
         translation_key="mode_individual_wednesday",
         entity_registry_enabled_default=False,
+        exists_fn=lambda device: device.series != "softliQ.SE",
         options=list(PARAMETER_OPERATION_MODES.values()),
         value_fn=lambda device: PARAMETER_OPERATION_MODES[
             device.parameters.mode_individual_wednesday  # type: ignore[index]
@@ -154,6 +157,7 @@ SELECTS: tuple[GruenbeckCloudEntityDescription, ...] = (
         key="mode_individual_thursday",
         translation_key="mode_individual_thursday",
         entity_registry_enabled_default=False,
+        exists_fn=lambda device: device.series != "softliQ.SE",
         options=list(PARAMETER_OPERATION_MODES.values()),
         value_fn=lambda device: PARAMETER_OPERATION_MODES[
             device.parameters.mode_individual_thursday  # type: ignore[index]
@@ -168,6 +172,7 @@ SELECTS: tuple[GruenbeckCloudEntityDescription, ...] = (
         key="mode_individual_friday",
         translation_key="mode_individual_friday",
         entity_registry_enabled_default=False,
+        exists_fn=lambda device: device.series != "softliQ.SE",
         options=list(PARAMETER_OPERATION_MODES.values()),
         value_fn=lambda device: PARAMETER_OPERATION_MODES[
             device.parameters.mode_individual_friday  # type: ignore[index]
@@ -182,6 +187,7 @@ SELECTS: tuple[GruenbeckCloudEntityDescription, ...] = (
         key="mode_individual_saturday",
         translation_key="mode_individual_saturday",
         entity_registry_enabled_default=False,
+        exists_fn=lambda device: device.series != "softliQ.SE",
         options=list(PARAMETER_OPERATION_MODES.values()),
         value_fn=lambda device: PARAMETER_OPERATION_MODES[
             device.parameters.mode_individual_saturday  # type: ignore[index]
@@ -196,6 +202,7 @@ SELECTS: tuple[GruenbeckCloudEntityDescription, ...] = (
         key="mode_individual_sunday",
         translation_key="mode_individual_sunday",
         entity_registry_enabled_default=False,
+        exists_fn=lambda device: device.series != "softliQ.SE",
         options=list(PARAMETER_OPERATION_MODES.values()),
         value_fn=lambda device: PARAMETER_OPERATION_MODES[
             device.parameters.mode_individual_sunday  # type: ignore[index]
