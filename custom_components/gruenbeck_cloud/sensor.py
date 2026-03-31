@@ -377,12 +377,11 @@ SENSORS: tuple[GruenbeckCloudEntityDescription, ...] = (
     GruenbeckCloudEntityDescription(
         key="lime_scale_indicator",
         translation_key="lime_scale_indicator",
-        entity_registry_enabled_default=False,
         exists_fn=lambda device: device.series == "softliQ.SE",
         native_unit_of_measurement=PERCENTAGE,
         value_fn=lambda device: device.realtime.lime_scale_indicator,
     ),
-    # Days until next inspection - SE only
+    # Days until next inspection - SE only (absent from some firmware versions)
     GruenbeckCloudEntityDescription(
         key="days_until_inspection",
         translation_key="days_until_inspection",
@@ -392,7 +391,7 @@ SENSORS: tuple[GruenbeckCloudEntityDescription, ...] = (
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda device: device.realtime.days_until_inspection,
     ),
-    # Regeneration counter since last service - SE only
+    # Regeneration counter since last service - SE only (absent from some firmware versions)
     GruenbeckCloudEntityDescription(
         key="regeneration_counter_service",
         translation_key="regeneration_counter_service",
@@ -401,7 +400,7 @@ SENSORS: tuple[GruenbeckCloudEntityDescription, ...] = (
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda device: device.realtime.regeneration_counter_service,
     ),
-    # Today's water usage [l] - SE only
+    # Today's water usage [l] - SE only (absent from some firmware versions)
     GruenbeckCloudEntityDescription(
         key="water_usage_today",
         translation_key="water_usage_today",
@@ -412,7 +411,7 @@ SENSORS: tuple[GruenbeckCloudEntityDescription, ...] = (
         state_class=SensorStateClass.TOTAL_INCREASING,
         value_fn=lambda device: device.realtime.water_usage_today,
     ),
-    # Today's salt usage [kg] - SE only
+    # Today's salt usage [kg] - SE only (absent from some firmware versions)
     GruenbeckCloudEntityDescription(
         key="salt_usage_today",
         translation_key="salt_usage_today",
@@ -423,7 +422,7 @@ SENSORS: tuple[GruenbeckCloudEntityDescription, ...] = (
         state_class=SensorStateClass.MEASUREMENT,
         value_fn=lambda device: device.realtime.salt_usage_today,
     ),
-    # Today's lime value - SE only
+    # Today's lime value - SE only (absent from some firmware versions)
     GruenbeckCloudEntityDescription(
         key="lime_today",
         translation_key="lime_today",
@@ -431,7 +430,7 @@ SENSORS: tuple[GruenbeckCloudEntityDescription, ...] = (
         exists_fn=lambda device: device.series == "softliQ.SE",
         value_fn=lambda device: device.realtime.lime_today,
     ),
-    # Regeneration progress exchanger 1 [%]
+    # Regeneration progress exchanger 1 [%] - SE only (absent from some firmware versions)
     GruenbeckCloudEntityDescription(
         key="regeneration_progress_1",
         translation_key="regeneration_progress_1",
@@ -444,7 +443,6 @@ SENSORS: tuple[GruenbeckCloudEntityDescription, ...] = (
     GruenbeckCloudEntityDescription(
         key="regeneration_progress_2",
         translation_key="regeneration_progress_2",
-        entity_registry_enabled_default=False,
         exists_fn=lambda device: device.series == "softliQ.SE",
         native_unit_of_measurement=PERCENTAGE,
         value_fn=lambda device: device.realtime.regeneration_progress_2,

@@ -14,7 +14,7 @@ CONF_DEVICE_ID: Final = "device_id"
 
 # Polling update interval
 UPDATE_INTERVAL: Final = timedelta(seconds=360)
-UPDATE_INTERVAL_POLLING: Final = timedelta(seconds=60)
+UPDATE_INTERVAL_POLLING: Final = timedelta(seconds=10)
 
 # Custom Unit of Measurement
 UNIT_OF_DH: Final = "°dH"

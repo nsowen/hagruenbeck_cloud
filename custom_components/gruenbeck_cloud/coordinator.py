@@ -1,6 +1,7 @@
 """Coordinator for Grünbeck Cloud integration."""
 from __future__ import annotations
 
+from datetime import datetime, timedelta, timezone
 import logging
 from typing import Any
 
@@ -40,8 +41,11 @@ _LOGGER = logging.getLogger(__name__)
 
 _SERIES_POLL_ONLY = "softliQ.SE"
 
+# Suppress UpdateFailed for this long before letting entities go unavailable.
+_ERROR_GRACE_PERIOD = timedelta(minutes=10)
+
 # How many SE polling cycles between full device-info refreshes.
-# UPDATE_INTERVAL / UPDATE_INTERVAL_POLLING = 360 / 60 = 6.
+# UPDATE_INTERVAL / UPDATE_INTERVAL_POLLING = 360 / 60 = 36.
 _POLL_CYCLES_PER_FULL_REFRESH = max(
     1, int(UPDATE_INTERVAL.total_seconds() / UPDATE_INTERVAL_POLLING.total_seconds())
 )
@@ -67,6 +71,7 @@ class GruenbeckCloudCoordinator(DataUpdateCoordinator[Device]):
 
         self.unsub: CALLBACK_TYPE | None = None
         self._poll_cycle: int = 0
+        self._error_since: datetime | None = None
 
         super().__init__(hass, _LOGGER, name=DOMAIN, update_interval=UPDATE_INTERVAL)
 
@@ -224,7 +229,7 @@ class GruenbeckCloudCoordinator(DataUpdateCoordinator[Device]):
                 if not self.api.connected and not self.unsub:
                     self._listen_websocket()
                 await self.api.get_device_infos()
-                return await self.api.get_device_infos_parameters()
+                data = await self.api.get_device_infos_parameters()
 
             else:
                 # SE-series: per-poll stateless cycle (refresh→enter→update→leave→off).
@@ -249,7 +254,10 @@ class GruenbeckCloudCoordinator(DataUpdateCoordinator[Device]):
 
                 self._poll_cycle += 1
 
-                return await self.api.poll_sd()
+                data = await self.api.poll_sd()
+
+            self._error_since = None
+            return data
 
         except (
             Exception,
@@ -257,4 +265,18 @@ class GruenbeckCloudCoordinator(DataUpdateCoordinator[Device]):
             KeyError,
             PyGruenbeckCloudResponseStatusError,
         ) as err:
+            now = datetime.now(timezone.utc)
+            if self._error_since is None:
+                self._error_since = now
+            elapsed = now - self._error_since
+            if self.data is not None and elapsed < _ERROR_GRACE_PERIOD:
+                self.logger.warning(
+                    "API error for %s (%.0fs elapsed, grace period %ds): %s — keeping last data",
+                    self.name,
+                    elapsed.total_seconds(),
+                    _ERROR_GRACE_PERIOD.total_seconds(),
+                    err,
+                )
+                return self.data
+            self._error_since = None
             raise UpdateFailed(f"Unable to get data from API: {err}") from err
