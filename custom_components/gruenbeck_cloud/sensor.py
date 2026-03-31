@@ -434,7 +434,6 @@ SENSORS: tuple[GruenbeckCloudEntityDescription, ...] = (
     GruenbeckCloudEntityDescription(
         key="regeneration_progress_1",
         translation_key="regeneration_progress_1",
-        entity_registry_enabled_default=False,
         exists_fn=lambda device: device.series == "softliQ.SE",
         native_unit_of_measurement=PERCENTAGE,
         value_fn=lambda device: device.realtime.regeneration_progress_1,
