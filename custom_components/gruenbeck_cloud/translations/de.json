@@ -406,6 +406,30 @@
       },
       "remaining_amount_of_water": {
         "name": "Adsorber Restwassermenge"
+      },
+      "lime_scale_indicator": {
+        "name": "Kalkindikator"
+      },
+      "days_until_inspection": {
+        "name": "Tage bis zur Inspektion"
+      },
+      "regeneration_counter_service": {
+        "name": "Regenerationszähler seit Wartung"
+      },
+      "water_usage_today": {
+        "name": "Wasserverbrauch heute"
+      },
+      "salt_usage_today": {
+        "name": "Salzverbrauch heute"
+      },
+      "lime_today": {
+        "name": "Kalk heute"
+      },
+      "regeneration_progress_1": {
+        "name": "Regenerationsfortschritt Austauscher 1"
+      },
+      "regeneration_progress_2": {
+        "name": "Regenerationsfortschritt Austauscher 2"
       }
     }
   }

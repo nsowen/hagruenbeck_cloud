@@ -6,3 +6,4 @@ logger:
   default: info
   logs:
     custom_components.gruenbeck_cloud: debug
+    pygruenbeck_cloud: debug

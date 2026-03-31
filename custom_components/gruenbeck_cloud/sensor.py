@@ -66,6 +66,7 @@ SENSORS: tuple[GruenbeckCloudEntityDescription, ...] = (
     GruenbeckCloudEntityDescription(
         key="last_service",
         translation_key="last_service",
+        exists_fn=lambda device: device.series != "softliQ.SE",
         device_class=SensorDeviceClass.DATE,
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda device: device.last_service,
@@ -174,7 +175,8 @@ SENSORS: tuple[GruenbeckCloudEntityDescription, ...] = (
     GruenbeckCloudEntityDescription(
         key="next_service",
         translation_key="next_service",
-        entity_registry_enabled_default=False,  # Not available at SE devices
+        entity_registry_enabled_default=False,
+        exists_fn=lambda device: device.series != "softliQ.SE",
         native_unit_of_measurement=UnitOfTime.DAYS,
         # device_class=SensorDeviceClass.DURATION,
         entity_category=EntityCategory.DIAGNOSTIC,
@@ -184,7 +186,8 @@ SENSORS: tuple[GruenbeckCloudEntityDescription, ...] = (
     GruenbeckCloudEntityDescription(
         key="regeneration_remaining_time",
         translation_key="regeneration_remaining_time",
-        entity_registry_enabled_default=False,  # Not available at SE devices
+        entity_registry_enabled_default=False,
+        exists_fn=lambda device: device.series != "softliQ.SE",
         value_fn=lambda device: device.realtime.regeneration_remaining_time,
     ),
     # Soft water exchanger 2 [l]
@@ -192,6 +195,7 @@ SENSORS: tuple[GruenbeckCloudEntityDescription, ...] = (
         key="soft_water_quantity_2",
         translation_key="soft_water_quantity_2",
         entity_registry_enabled_default=False,
+        exists_fn=lambda device: device.series != "softliQ.SE",
         native_unit_of_measurement=UnitOfVolume.LITERS,
         device_class=SensorDeviceClass.WATER,
         state_class=SensorStateClass.TOTAL_INCREASING,
@@ -237,6 +241,7 @@ SENSORS: tuple[GruenbeckCloudEntityDescription, ...] = (
         key="exhausted_percentage",
         translation_key="exhausted_percentage",
         entity_registry_enabled_default=False,
+        exists_fn=lambda device: device.series != "softliQ.SE",
         native_unit_of_measurement=PERCENTAGE,
         value_fn=lambda device: device.realtime.exhausted_percentage,
     ),
@@ -245,6 +250,7 @@ SENSORS: tuple[GruenbeckCloudEntityDescription, ...] = (
         key="actual_value_soft_water_hardness",
         translation_key="actual_value_soft_water_hardness",
         entity_registry_enabled_default=False,
+        exists_fn=lambda device: device.series != "softliQ.SE",
         native_unit_of_measurement=UNIT_OF_DH,
         value_fn=lambda device: device.realtime.actual_value_soft_water_hardness,
     ),
@@ -261,6 +267,7 @@ SENSORS: tuple[GruenbeckCloudEntityDescription, ...] = (
         key="flow_rate_peak_value",
         translation_key="flow_rate_peak_value",
         entity_registry_enabled_default=False,
+        exists_fn=lambda device: device.series != "softliQ.SE",
         native_unit_of_measurement=UnitOfVolumeFlowRate.CUBIC_METERS_PER_HOUR,
         device_class=SensorDeviceClass.VOLUME_FLOW_RATE,
         value_fn=lambda device: device.realtime.flow_rate_peak_value,
@@ -270,6 +277,7 @@ SENSORS: tuple[GruenbeckCloudEntityDescription, ...] = (
         key="exchanger_peak_value",
         translation_key="exchanger_peak_value",
         entity_registry_enabled_default=False,
+        exists_fn=lambda device: device.series != "softliQ.SE",
         native_unit_of_measurement=UnitOfVolumeFlowRate.CUBIC_METERS_PER_HOUR,
         device_class=SensorDeviceClass.VOLUME_FLOW_RATE,
         value_fn=lambda device: device.realtime.exchanger_peak_value,
@@ -279,6 +287,7 @@ SENSORS: tuple[GruenbeckCloudEntityDescription, ...] = (
         key="exchanger_peak_value_2",
         translation_key="exchanger_peak_value_2",
         entity_registry_enabled_default=False,
+        exists_fn=lambda device: device.series != "softliQ.SE",
         native_unit_of_measurement=UnitOfVolumeFlowRate.CUBIC_METERS_PER_HOUR,
         device_class=SensorDeviceClass.VOLUME_FLOW_RATE,
         value_fn=lambda device: device.realtime.exchanger_peak_value_2,
@@ -288,6 +297,7 @@ SENSORS: tuple[GruenbeckCloudEntityDescription, ...] = (
         key="last_regeneration_exchanger",
         translation_key="last_regeneration_exchanger",
         entity_registry_enabled_default=False,
+        exists_fn=lambda device: device.series != "softliQ.SE",
         value_fn=lambda device: str(device.realtime.last_regeneration_exchanger),
     ),
     # Last regeneration Exchanger 2 [hh:mm]
@@ -295,6 +305,7 @@ SENSORS: tuple[GruenbeckCloudEntityDescription, ...] = (
         key="last_regeneration_exchanger_2",
         translation_key="last_regeneration_exchanger_2",
         entity_registry_enabled_default=False,
+        exists_fn=lambda device: device.series != "softliQ.SE",
         value_fn=lambda device: str(device.realtime.last_regeneration_exchanger_2),
     ),
     # Regeneration flow rate Exchanger 1 [l/h]
@@ -343,6 +354,7 @@ SENSORS: tuple[GruenbeckCloudEntityDescription, ...] = (
         key="current_chlorine",
         translation_key="current_chlorine",
         entity_registry_enabled_default=False,
+        exists_fn=lambda device: device.series != "softliQ.SE",
         native_unit_of_measurement=UnitOfElectricCurrent.MILLIAMPERE,
         device_class=SensorDeviceClass.CURRENT,
         value_fn=lambda device: device.realtime.current_chlorine,
@@ -355,6 +367,87 @@ SENSORS: tuple[GruenbeckCloudEntityDescription, ...] = (
         native_unit_of_measurement=UnitOfVolume.CUBIC_METERS,
         device_class=SensorDeviceClass.VOLUME,
         value_fn=lambda device: device.realtime.remaining_amount_of_water,
+    ),
+    #################################################################
+    #                                                               #
+    # SE-series only entities                                       #
+    #                                                               #
+    #################################################################
+    # Lime scale indicator [%] - SE only
+    GruenbeckCloudEntityDescription(
+        key="lime_scale_indicator",
+        translation_key="lime_scale_indicator",
+        entity_registry_enabled_default=False,
+        exists_fn=lambda device: device.series == "softliQ.SE",
+        native_unit_of_measurement=PERCENTAGE,
+        value_fn=lambda device: device.realtime.lime_scale_indicator,
+    ),
+    # Days until next inspection - SE only
+    GruenbeckCloudEntityDescription(
+        key="days_until_inspection",
+        translation_key="days_until_inspection",
+        entity_registry_enabled_default=False,
+        exists_fn=lambda device: device.series == "softliQ.SE",
+        native_unit_of_measurement=UnitOfTime.DAYS,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda device: device.realtime.days_until_inspection,
+    ),
+    # Regeneration counter since last service - SE only
+    GruenbeckCloudEntityDescription(
+        key="regeneration_counter_service",
+        translation_key="regeneration_counter_service",
+        entity_registry_enabled_default=False,
+        exists_fn=lambda device: device.series == "softliQ.SE",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda device: device.realtime.regeneration_counter_service,
+    ),
+    # Today's water usage [l] - SE only
+    GruenbeckCloudEntityDescription(
+        key="water_usage_today",
+        translation_key="water_usage_today",
+        entity_registry_enabled_default=False,
+        exists_fn=lambda device: device.series == "softliQ.SE",
+        native_unit_of_measurement=UnitOfVolume.LITERS,
+        device_class=SensorDeviceClass.WATER,
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        value_fn=lambda device: device.realtime.water_usage_today,
+    ),
+    # Today's salt usage [kg] - SE only
+    GruenbeckCloudEntityDescription(
+        key="salt_usage_today",
+        translation_key="salt_usage_today",
+        entity_registry_enabled_default=False,
+        exists_fn=lambda device: device.series == "softliQ.SE",
+        native_unit_of_measurement=UnitOfMass.KILOGRAMS,
+        device_class=SensorDeviceClass.WEIGHT,
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=lambda device: device.realtime.salt_usage_today,
+    ),
+    # Today's lime value - SE only
+    GruenbeckCloudEntityDescription(
+        key="lime_today",
+        translation_key="lime_today",
+        entity_registry_enabled_default=False,
+        exists_fn=lambda device: device.series == "softliQ.SE",
+        value_fn=lambda device: device.realtime.lime_today,
+    ),
+    # Regeneration progress exchanger 1 [%]
+    GruenbeckCloudEntityDescription(
+        key="regeneration_progress_1",
+        translation_key="regeneration_progress_1",
+        entity_registry_enabled_default=False,
+        exists_fn=lambda device: device.series == "softliQ.SE",
+        native_unit_of_measurement=PERCENTAGE,
+        value_fn=lambda device: device.realtime.regeneration_progress_1,
+    ),
+    # Regeneration progress exchanger 2 [%]
+    GruenbeckCloudEntityDescription(
+        key="regeneration_progress_2",
+        translation_key="regeneration_progress_2",
+        entity_registry_enabled_default=False,
+        exists_fn=lambda device: device.series == "softliQ.SE",
+        native_unit_of_measurement=PERCENTAGE,
+        value_fn=lambda device: device.realtime.regeneration_progress_2,
     ),
 )
 

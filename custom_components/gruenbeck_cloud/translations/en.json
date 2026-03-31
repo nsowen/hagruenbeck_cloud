@@ -271,6 +271,30 @@
       },
       "step_indication_regeneration_valve_2": {
         "name": "Step indication regeneration valve 2"
+      },
+      "lime_scale_indicator": {
+        "name": "Lime Scale Indicator"
+      },
+      "days_until_inspection": {
+        "name": "Days until Inspection"
+      },
+      "regeneration_counter_service": {
+        "name": "Regeneration Counter since Service"
+      },
+      "water_usage_today": {
+        "name": "Water Usage Today"
+      },
+      "salt_usage_today": {
+        "name": "Salt Usage Today"
+      },
+      "lime_today": {
+        "name": "Lime Today"
+      },
+      "regeneration_progress_1": {
+        "name": "Regeneration Progress Exchanger 1"
+      },
+      "regeneration_progress_2": {
+        "name": "Regeneration Progress Exchanger 2"
       }
     },
     "switch": {
